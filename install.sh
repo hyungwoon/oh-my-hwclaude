@@ -34,7 +34,29 @@ for rule_file in "$SCRIPT_DIR/rules/"*.md; do
   echo "  ✓ $RULES_DIR/hwclaude-${filename}"
 done
 
-# 4. Update Claude Code settings
+# 4. Install commands (slash commands)
+echo "📋 Installing commands..."
+COMMANDS_DIR="$CLAUDE_DIR/commands"
+mkdir -p "$COMMANDS_DIR"
+
+for cmd_file in "$SCRIPT_DIR/commands/"*.md; do
+  filename=$(basename "$cmd_file")
+  cp "$cmd_file" "$COMMANDS_DIR/hwclaude-${filename}"
+  echo "  ✓ $COMMANDS_DIR/hwclaude-${filename}"
+done
+
+# 5. Install agents
+echo "🤖 Installing agents..."
+AGENTS_DIR="$CLAUDE_DIR/agents"
+mkdir -p "$AGENTS_DIR"
+
+for agent_file in "$SCRIPT_DIR/agents/"*.md; do
+  filename=$(basename "$agent_file")
+  cp "$agent_file" "$AGENTS_DIR/hwclaude-${filename}"
+  echo "  ✓ $AGENTS_DIR/hwclaude-${filename}"
+done
+
+# 6. Update Claude Code settings
 echo ""
 echo "⚙️  Configuring Claude Code settings..."
 
@@ -129,7 +151,9 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "  ✅ Installation complete!"
 echo ""
 echo "  MCP Server: oh-my-hwclaude"
-echo "  Rules: $RULES_DIR/hwclaude-*"
+echo "  Rules: ~/.claude/rules/hwclaude-* (4 files)"
+echo "  Commands: ~/.claude/commands/hwclaude-* (3 files)"
+echo "  Agents: ~/.claude/agents/hwclaude-* (6 files)"
 echo "  Hooks: PreToolUse + PostToolUse + Stop"
 echo ""
 echo "  Restart Claude Code to activate."

@@ -20,7 +20,7 @@ interface HookDecision {
 }
 
 export function handlePostToolUse(input: PostToolUseInput): HookDecision | null {
-  const { tool_name, tool_output } = input
+  const { tool_name, tool_input, tool_output } = input
 
   // 1. Edit error recovery
   if (isEditTool(tool_name) && isEditError(tool_output)) {
@@ -30,6 +30,11 @@ export function handlePostToolUse(input: PostToolUseInput): HookDecision | null 
   // 2. JSON error recovery
   if (isJsonError(tool_output)) {
     return jsonErrorRecovery()
+  }
+
+  // 3. Comment checker — detect AI placeholder comments after successful edits
+  if (isEditTool(tool_name) && !isEditError(tool_output)) {
+    return commentChecker(tool_input, tool_output)
   }
 
   return null
@@ -102,6 +107,45 @@ function editErrorRecovery(output: string): HookDecision {
   }
 
   return { decision: 'block', reason: guidance }
+}
+
+const AI_COMMENT_PATTERNS = [
+  /\/\/\s*TODO:\s*implement/i,
+  /\/\/\s*TODO:\s*add\s+your/i,
+  /\/\/\s*\.\.\.\s*rest\s*(of\s*)?(the\s*)?code/i,
+  /\/\/\s*\.\.\.\s*existing\s*code/i,
+  /\/\/\s*add\s+your\s+code\s+here/i,
+  /\/\/\s*implement\s+this/i,
+  /\/\/\s*placeholder/i,
+  /throw\s+new\s+Error\s*\(\s*['"]Not\s+implemented['"]\s*\)/,
+]
+
+function commentChecker(input: Record<string, unknown>, _output: string): HookDecision | null {
+  // Check new_string (Edit) or content in tool_output for AI placeholder comments
+  const newString = (input.new_string as string) || (input.content as string) || ''
+  if (!newString) return null
+
+  const warnings: string[] = []
+  const lines = newString.split('\n')
+
+  for (let i = 0; i < lines.length; i++) {
+    for (const pattern of AI_COMMENT_PATTERNS) {
+      if (pattern.test(lines[i])) {
+        warnings.push(`  - Line ${i + 1}: "${lines[i].trim()}"`)
+        break
+      }
+    }
+  }
+
+  if (warnings.length === 0) return null
+
+  return {
+    decision: 'block',
+    reason:
+      '[oh-my-hwclaude] AI PLACEHOLDER DETECTED: Your edit contains placeholder comments that should be replaced with actual implementation:\n' +
+      warnings.join('\n') +
+      '\n\nReplace these with real code before proceeding.',
+  }
 }
 
 function jsonErrorRecovery(): HookDecision {

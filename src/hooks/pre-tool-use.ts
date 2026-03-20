@@ -33,6 +33,11 @@ export function handlePreToolUse(input: PreToolUseInput): HookDecision | null {
     return writeGuard(tool_input)
   }
 
+  // 3. Non-interactive env — block interactive commands in Bash
+  if (tool_name === 'Bash') {
+    return nonInteractiveGuard(tool_input)
+  }
+
   return null
 }
 
@@ -45,6 +50,50 @@ function editGuard(_input: Record<string, unknown>): HookDecision | null {
       'hashline_edit uses hash-anchored references that prevent stale edits. ' +
       'Use hashline_read first to get LINE#HASH references, then hashline_edit to apply changes.',
   }
+}
+
+const INTERACTIVE_COMMANDS = [
+  'vim', 'vi', 'nvim', 'nano', 'emacs', 'pico',
+  'less', 'more', 'man',
+  'python', 'python3', 'node', 'irb', 'ghci',  // REPLs without args
+]
+
+const INTERACTIVE_GIT_PATTERNS = [
+  /git\s+add\s+-p/,
+  /git\s+add\s+--patch/,
+  /git\s+rebase\s+-i/,
+  /git\s+rebase\s+--interactive/,
+]
+
+function nonInteractiveGuard(input: Record<string, unknown>): HookDecision | null {
+  const command = (input.command as string || '').trim()
+  if (!command) return null
+
+  // Check for interactive commands
+  const firstWord = command.split(/\s+/)[0]
+  if (INTERACTIVE_COMMANDS.includes(firstWord)) {
+    // Allow python/node with script arguments
+    const parts = command.split(/\s+/)
+    if (['python', 'python3', 'node'].includes(firstWord) && parts.length > 1 && !parts[1].startsWith('-')) {
+      return null
+    }
+    return {
+      decision: 'block',
+      reason: `[oh-my-hwclaude] Interactive command blocked: "${firstWord}" requires terminal interaction. Use non-interactive alternatives instead.`,
+    }
+  }
+
+  // Check for interactive git patterns
+  for (const pattern of INTERACTIVE_GIT_PATTERNS) {
+    if (pattern.test(command)) {
+      return {
+        decision: 'block',
+        reason: `[oh-my-hwclaude] Interactive git command blocked. Use non-interactive alternatives (e.g., git add specific files instead of -p).`,
+      }
+    }
+  }
+
+  return null
 }
 
 function writeGuard(input: Record<string, unknown>): HookDecision | null {

@@ -14,9 +14,11 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # 1. Remove rules
-echo "🗑️  Removing rules..."
+echo "🗑️  Removing rules, commands, agents..."
 rm -f "$RULES_DIR"/hwclaude-*.md
-echo "  ✓ Rules removed"
+rm -f "$CLAUDE_DIR"/commands/hwclaude-*.md
+rm -f "$CLAUDE_DIR"/agents/hwclaude-*.md
+echo "  ✓ Rules, commands, agents removed"
 
 # 2. Update Claude Code settings
 echo "⚙️  Updating Claude Code settings..."
