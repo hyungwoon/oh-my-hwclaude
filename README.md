@@ -62,7 +62,9 @@ hashline 도구 3개는 설치 시 **자동 승인**으로 등록됩니다.
 
 ---
 
-## 설치 (3줄이면 끝)
+## 설치
+
+### 방법 1: 직접 설치 (3줄이면 끝)
 
 ```bash
 git clone https://github.com/hyungwoon/oh-my-hwclaude.git
@@ -70,7 +72,26 @@ cd oh-my-hwclaude
 ./install.sh
 ```
 
-설치 후 **Claude Code를 재시작**하면 바로 활성화됩니다.
+### 방법 2: Claude Code한테 시키기
+
+Claude Code 세션에서 그냥 이렇게 말하면 됩니다:
+
+```
+gh repo clone hyungwoon/oh-my-hwclaude /tmp/oh-my-hwclaude && cd /tmp/oh-my-hwclaude && ./install.sh 실행해줘
+```
+
+또는 더 간단하게:
+
+```
+oh-my-hwclaude 설치해줘. https://github.com/hyungwoon/oh-my-hwclaude
+```
+
+Claude가 알아서 클론하고, 빌드하고, 설정까지 해줍니다.
+설치가 끝나면 Claude Code를 재시작하라고 안내가 나와요.
+
+### 설치 후
+
+**Claude Code를 재시작**하면 바로 활성화됩니다.
 
 > Node.js 20 이상이 필요합니다.
 
@@ -79,6 +100,12 @@ cd oh-my-hwclaude
 ```bash
 cd oh-my-hwclaude
 ./uninstall.sh
+```
+
+또는 Claude Code에서:
+
+```
+oh-my-hwclaude 제거해줘
 ```
 
 설정이 깔끔하게 원복됩니다. 기존 설정은 건드리지 않아요.
