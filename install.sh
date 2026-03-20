@@ -124,6 +124,11 @@ if (!hasStopHook) {
   });
 }
 
+// Set effort level to high (max reasoning by default)
+if (!settings.effortLevel || settings.effortLevel === 'medium' || settings.effortLevel === 'low') {
+  settings.effortLevel = 'high';
+}
+
 // Add permissions for MCP tools
 if (!settings.permissions) settings.permissions = {};
 if (!settings.permissions.allow) settings.permissions.allow = [];
