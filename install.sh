@@ -94,33 +94,33 @@ if (!settings.hooks) settings.hooks = {};
 // PreToolUse hooks
 if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
 const preHookCmd = 'node ' + path.join(scriptDir, 'dist', 'hooks', 'index.js') + ' pre-tool-use';
-const hasPreHook = settings.hooks.PreToolUse.some(h => h.command && h.command.includes('hwclaude'));
+const hasPreHook = settings.hooks.PreToolUse.some(h => JSON.stringify(h).includes('hwclaude'));
 if (!hasPreHook) {
   settings.hooks.PreToolUse.push({
     matcher: 'Edit|Write',
-    command: preHookCmd,
+    hooks: [{ type: 'command', command: preHookCmd }],
   });
 }
 
 // PostToolUse hooks
 if (!settings.hooks.PostToolUse) settings.hooks.PostToolUse = [];
 const postHookCmd = 'node ' + path.join(scriptDir, 'dist', 'hooks', 'index.js') + ' post-tool-use';
-const hasPostHook = settings.hooks.PostToolUse.some(h => h.command && h.command.includes('hwclaude'));
+const hasPostHook = settings.hooks.PostToolUse.some(h => JSON.stringify(h).includes('hwclaude'));
 if (!hasPostHook) {
   settings.hooks.PostToolUse.push({
     matcher: '',
-    command: postHookCmd,
+    hooks: [{ type: 'command', command: postHookCmd }],
   });
 }
 
 // Stop hooks
 if (!settings.hooks.Stop) settings.hooks.Stop = [];
 const stopHookCmd = 'node ' + path.join(scriptDir, 'dist', 'hooks', 'index.js') + ' stop';
-const hasStopHook = settings.hooks.Stop.some(h => h.command && h.command.includes('hwclaude'));
+const hasStopHook = settings.hooks.Stop.some(h => JSON.stringify(h).includes('hwclaude'));
 if (!hasStopHook) {
   settings.hooks.Stop.push({
     matcher: '',
-    command: stopHookCmd,
+    hooks: [{ type: 'command', command: stopHookCmd }],
   });
 }
 
