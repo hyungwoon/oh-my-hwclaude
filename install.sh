@@ -182,7 +182,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "  ✅ Installation complete!"
 echo ""
 echo "  MCP Server: oh-my-hwclaude"
-echo "  Rules: ~/.claude/rules/hwclaude-* (4 files)"
+echo "  Rules: ~/.claude/rules/hwclaude-* (11 files)"
 echo "  Commands: ~/.claude/commands/hwclaude-* (3 files)"
 echo "  Agents: ~/.claude/agents/hwclaude-* (6 files)"
 echo "  Hooks: PreToolUse + PostToolUse + Stop"
