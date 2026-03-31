@@ -6,17 +6,16 @@
  * 2. Unverified changes (remind to test)
  */
 
-interface StopInput {
-  session_id: string
-  stop_reason: string
-}
+import type { StopInput, HookResponse } from './types.js'
 
-interface HookDecision {
-  decision: 'block'
-  reason: string
-}
+const STOP_CHECK_REASON =
+  '[oh-my-hwclaude] STOP CHECK: Before finishing, verify:\n' +
+  '- All edits have been applied correctly\n' +
+  '- No build errors introduced (run build/lint if applicable)\n' +
+  '- Changes match the user\'s request\n' +
+  'If everything is verified, you may proceed to stop.'
 
-export function handleStop(input: StopInput): HookDecision | null {
+export function handleStop(input: StopInput): HookResponse | null {
   const { stop_reason } = input
 
   // Only intercept assistant-initiated stops, not user-forced stops
@@ -28,12 +27,7 @@ export function handleStop(input: StopInput): HookDecision | null {
   if (stop_reason === 'end_turn') {
     return {
       decision: 'block',
-      reason:
-        '[oh-my-hwclaude] STOP CHECK: Before finishing, verify:\n' +
-        '- All edits have been applied correctly\n' +
-        '- No build errors introduced (run build/lint if applicable)\n' +
-        '- Changes match the user\'s request\n' +
-        'If everything is verified, you may proceed to stop.',
+      reason: STOP_CHECK_REASON,
     }
   }
 

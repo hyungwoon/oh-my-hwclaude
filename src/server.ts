@@ -27,9 +27,10 @@ const server = new McpServer({
 
 // ─── hashline_read ───────────────────────────────────────────
 
-server.tool(
+server.registerTool(
   'hashline_read',
-  `Read a file with hash-annotated line references.
+  {
+    description: `Read a file with hash-annotated line references.
 
 Each line is returned in the format: LINE#HASH|content
 Example: 42#VK|  function hello() {
@@ -39,10 +40,15 @@ The hash verifies the line content hasn't changed since you read it.
 
 IMPORTANT: Always use hashline_read instead of the built-in Read tool
 when you plan to edit the file afterward.`,
-  {
-    file_path: z.string().describe('Absolute path to the file to read'),
-    offset: z.number().optional().describe('Line offset (0-based). Default: 0'),
-    limit: z.number().optional().describe('Max lines to read. Default: 2000'),
+    inputSchema: {
+      file_path: z.string().describe('Absolute path to the file to read'),
+      offset: z.number().optional().describe('Line offset (0-based). Default: 0'),
+      limit: z.number().optional().describe('Max lines to read. Default: 2000'),
+    },
+    _meta: {
+      'anthropic/alwaysLoad': true,
+      'anthropic/searchHint': 'hash-anchored file reading with line references',
+    },
   },
   async ({ file_path, offset, limit }) => {
     try {
@@ -80,9 +86,10 @@ const editSchema = z.object({
   ),
 })
 
-server.tool(
+server.registerTool(
   'hashline_edit',
-  `Edit a file using hash-anchored line references.
+  {
+    description: `Edit a file using hash-anchored line references.
 
 WORKFLOW:
 1. First read the file with hashline_read to get LINE#HASH references
@@ -107,11 +114,16 @@ ADVANTAGES over string-matching Edit:
 - Multiple edits in a single call
 
 IMPORTANT: Always use hashline_read first to get fresh LINE#HASH references.`,
-  {
-    file_path: z.string().describe('Absolute path to the file to edit'),
-    edits: z.array(editSchema).optional().describe('Array of edit operations'),
-    delete: z.boolean().optional().describe('Delete the file instead of editing'),
-    rename: z.string().optional().describe('Rename the file (new filename, not full path)'),
+    inputSchema: {
+      file_path: z.string().describe('Absolute path to the file to edit'),
+      edits: z.array(editSchema).optional().describe('Array of edit operations'),
+      delete: z.boolean().optional().describe('Delete the file instead of editing'),
+      rename: z.string().optional().describe('Rename the file (new filename, not full path)'),
+    },
+    _meta: {
+      'anthropic/alwaysLoad': true,
+      'anthropic/searchHint': 'hash-anchored line-level file editing with stale-edit prevention',
+    },
   },
   async ({ file_path, edits, delete: deleteFile, rename }) => {
     try {
@@ -144,15 +156,21 @@ IMPORTANT: Always use hashline_read first to get fresh LINE#HASH references.`,
 
 // ─── hashline_write ──────────────────────────────────────────
 
-server.tool(
+server.registerTool(
   'hashline_write',
-  `Create a new file. Use this only for NEW files — for existing files, use hashline_edit.
+  {
+    description: `Create a new file. Use this only for NEW files — for existing files, use hashline_edit.
 
 This tool will REFUSE to overwrite an existing file. If the file exists,
 use hashline_read + hashline_edit instead.`,
-  {
-    file_path: z.string().describe('Absolute path for the new file'),
-    content: z.string().describe('File content to write'),
+    inputSchema: {
+      file_path: z.string().describe('Absolute path for the new file'),
+      content: z.string().describe('File content to write'),
+    },
+    _meta: {
+      'anthropic/alwaysLoad': true,
+      'anthropic/searchHint': 'create new files with hash tracking',
+    },
   },
   async ({ file_path, content }) => {
     try {

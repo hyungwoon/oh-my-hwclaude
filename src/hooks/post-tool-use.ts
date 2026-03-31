@@ -4,22 +4,12 @@
  * Hooks:
  * 1. edit-error-recovery: When Edit/hashline_edit fails, inject recovery instructions
  * 2. json-error-recovery: When JSON parse errors occur, inject fix guidance
- * 3. context-monitor: Warn about context window usage
+ * 3. comment-checker: Detect AI placeholder comments after successful edits
  */
 
-interface PostToolUseInput {
-  session_id: string
-  tool_name: string
-  tool_input: Record<string, unknown>
-  tool_output: string
-}
+import type { PostToolUseInput, HookResponse } from './types.js'
 
-interface HookDecision {
-  decision: 'block'
-  reason: string
-}
-
-export function handlePostToolUse(input: PostToolUseInput): HookDecision | null {
+export function handlePostToolUse(input: PostToolUseInput): HookResponse | null {
   const { tool_name, tool_input, tool_output } = input
 
   // 1. Edit error recovery
@@ -67,7 +57,7 @@ function isJsonError(output: string): boolean {
   return patterns.some(pattern => new RegExp(pattern, 'i').test(output))
 }
 
-function editErrorRecovery(output: string): HookDecision {
+function editErrorRecovery(output: string): HookResponse {
   const isHashMismatch = /hash mismatch/i.test(output)
   const isNotFound = /not found/i.test(output)
   const isNoChange = /no changes detected/i.test(output)
@@ -106,7 +96,14 @@ function editErrorRecovery(output: string): HookDecision {
       '3. Retry with corrected parameters'
   }
 
-  return { decision: 'block', reason: guidance }
+  return {
+    decision: 'block',
+    reason: guidance,
+    hookSpecificOutput: {
+      hookEventName: 'PostToolUse',
+      additionalContext: guidance,
+    },
+  }
 }
 
 const AI_COMMENT_PATTERNS = [
@@ -120,7 +117,7 @@ const AI_COMMENT_PATTERNS = [
   /throw\s+new\s+Error\s*\(\s*['"]Not\s+implemented['"]\s*\)/,
 ]
 
-function commentChecker(input: Record<string, unknown>, _output: string): HookDecision | null {
+function commentChecker(input: Record<string, unknown>, _output: string): HookResponse | null {
   // Check new_string (Edit) or content in tool_output for AI placeholder comments
   const newString = (input.new_string as string) || (input.content as string) || ''
   if (!newString) return null
@@ -139,24 +136,36 @@ function commentChecker(input: Record<string, unknown>, _output: string): HookDe
 
   if (warnings.length === 0) return null
 
+  const reason =
+    '[oh-my-hwclaude] AI PLACEHOLDER DETECTED: Your edit contains placeholder comments that should be replaced with actual implementation:\n' +
+    warnings.join('\n') +
+    '\n\nReplace these with real code before proceeding.'
+
   return {
     decision: 'block',
-    reason:
-      '[oh-my-hwclaude] AI PLACEHOLDER DETECTED: Your edit contains placeholder comments that should be replaced with actual implementation:\n' +
-      warnings.join('\n') +
-      '\n\nReplace these with real code before proceeding.',
+    reason,
+    hookSpecificOutput: {
+      hookEventName: 'PostToolUse',
+      additionalContext: reason,
+    },
   }
 }
 
-function jsonErrorRecovery(): HookDecision {
+function jsonErrorRecovery(): HookResponse {
+  const reason =
+    '[oh-my-hwclaude] JSON RECOVERY: A JSON parsing error occurred in the tool call.\n' +
+    'ACTION REQUIRED:\n' +
+    '1. Check for trailing commas, missing quotes, or unescaped characters\n' +
+    '2. Ensure all strings are properly quoted with double quotes\n' +
+    '3. Verify array/object brackets are balanced\n' +
+    '4. Retry the tool call with corrected JSON'
+
   return {
     decision: 'block',
-    reason:
-      '[oh-my-hwclaude] JSON RECOVERY: A JSON parsing error occurred in the tool call.\n' +
-      'ACTION REQUIRED:\n' +
-      '1. Check for trailing commas, missing quotes, or unescaped characters\n' +
-      '2. Ensure all strings are properly quoted with double quotes\n' +
-      '3. Verify array/object brackets are balanced\n' +
-      '4. Retry the tool call with corrected JSON',
+    reason,
+    hookSpecificOutput: {
+      hookEventName: 'PostToolUse',
+      additionalContext: reason,
+    },
   }
 }
