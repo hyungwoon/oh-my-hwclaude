@@ -133,7 +133,7 @@ oh-my-hwclaude 제거해줘
 | **PreToolUse 훅** | Edit/Write 사용 시 "hashline 써봐" 안내 |
 | **PostToolUse 훅** | 편집 실패 시 자동 복구 가이드 주입 |
 | **Stop 훅** | 작업 끝내기 전 "검증했어?" 리마인더 |
-| **규칙 파일** | `~/.claude/rules/hwclaude-*.md` 4개 (사용법, 자율 실행, 품질 게이트, 모듈러 코드) |
+| **규칙 파일** | `~/.claude/rules/hwclaude-*.md` 11개 |
 | **커맨드** | `~/.claude/commands/hwclaude-*.md` 3개 (github-triage, work-with-pr, remove-deadcode) |
 | **에이전트** | `~/.claude/agents/hwclaude-*.md` 6개 |
 | **퍼미션** | hashline 도구 3개 자동 승인 |
@@ -215,18 +215,32 @@ oh-my-hwclaude/
 │   │   │   ├── canonicalization.ts  # BOM/CRLF 처리
 │   │   │   ├── diff-utils.ts        # unified diff 생성
 │   │   │   ├── constants.ts         # 해시 딕셔너리
-│   │   │   └── types.ts             # 타입 정의
+│   │   │   ├── types.ts             # 타입 정의
+│   │   │   └── index.ts             # 진입점
 │   │   └── hashline-read/           # 해시 태그 파일 읽기
 │   ├── hooks/                       # Claude Code 훅
+│   │   ├── index.ts                 # 훅 진입점
+│   │   ├── types.ts                 # 훅 타입 정의
 │   │   ├── pre-tool-use.ts          # Edit/Write 가드
 │   │   ├── post-tool-use.ts         # 에러 자동 복구
-│   │   └── stop.ts                  # 완료 검증
+│   │   ├── post-tool-use-failure.ts # 실패 후처리
+│   │   ├── stop.ts                  # 완료 검증
+│   │   ├── session-start.ts         # 세션 시작 초기화
+│   │   ├── subagent-start.ts        # 서브에이전트 시작
+│   │   └── comment-checker.ts       # 코멘트 검사
 │   └── __tests__/                   # 테스트 (14개 전부 통과)
-├── rules/                           # Claude Code 규칙 파일
+├── rules/                           # Claude Code 규칙 파일 (11개)
 │   ├── hashline-system.md           # hashline 사용법
 │   ├── autonomous-execution.md      # 자율 실행 패턴
 │   ├── quality-gates.md             # 코드 품질 게이트
-│   └── modular-code-enforcement.md  # 모듈러 코드 아키텍처
+│   ├── modular-code-enforcement.md  # 모듈러 코드 아키텍처
+│   ├── complexity-decomposer.md     # 복잡도 분해
+│   ├── context-compaction.md        # 컨텍스트 압축
+│   ├── contract-enforcement.md      # 계약 강제
+│   ├── entropy-cleanup.md           # 엔트로피 정리
+│   ├── fresh-context-verification.md # 신선 컨텍스트 검증
+│   ├── plan-compete.md              # 계획 경쟁
+│   └── telemetry-rubrics.md         # 텔레메트리 루브릭
 ├── agents/                          # 커스텀 에이전트 (6개)
 ├── commands/                        # 슬래시 커맨드 (3개)
 │   ├── github-triage.md             # GitHub 이슈/PR 트리아지
