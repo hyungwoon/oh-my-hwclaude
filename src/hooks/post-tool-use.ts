@@ -8,9 +8,13 @@
  */
 
 import type { PostToolUseInput, HookResponse } from './types.js'
+import { markVerified } from './stop-state.js'
 
 export function handlePostToolUse(input: PostToolUseInput): HookResponse | null {
-  const { tool_name, tool_input, tool_output } = input
+  const { session_id, tool_name, tool_input, tool_output } = input
+
+  // Mark verification complete — any tool use after stop-check counts as verification
+  markVerified(session_id)
 
   // 1. Edit error recovery
   if (isEditTool(tool_name) && isEditError(tool_output)) {
