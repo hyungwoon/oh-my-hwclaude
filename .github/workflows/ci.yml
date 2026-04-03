@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Draft PR 스킵
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Smart routing: 변경 스코프 감지
+  preflight:
+    runs-on: ubuntu-latest
+    outputs:
+      has_ts: ${{ steps.changes.outputs.ts }}
+      has_md: ${{ steps.changes.outputs.md }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            ts:
+              - 'src/**'
+              - 'package.json'
+              - 'tsconfig.json'
+            md:
+              - 'rules/**'
+              - 'agents/**'
+              - '*.md'
+
+  # Layer 2: 단일 품질 게이트
+  check:
+    needs: preflight
+    if: needs.preflight.outputs.has_ts == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # 자동수정 불가 — 전부 차단
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Test
+        run: npx vitest run --reporter=dot
+
+      - name: AI slop check
+        run: bash scripts/check-ai-slop.sh $(find src -name '*.ts' -not -name '*.test.ts')
+
+      - name: Build
+        run: npm run build
+
+  # 아키텍처 경계 가드
+  boundaries:
+    needs: preflight
+    if: needs.preflight.outputs.has_ts == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: hooks → tools 직접 import 금지
+        run: |
+          if grep -rn "from ['\"].*tools/" src/hooks/ 2>/dev/null; then
+            echo "hooks/ must not import from tools/ directly."
+            exit 1
+          fi
+
+      - name: src → dist import 금지
+        run: |
+          if grep -rn "from ['\"].*dist/" src/ 2>/dev/null; then
+            echo "src/ must not import from dist/."
+            exit 1
+          fi
+
+      - name: 상대경로 src 밖 참조 금지
+        run: |
+          if grep -rn "from ['\"]\.\.\/\.\.\/" src/ 2>/dev/null; then
+            echo "No imports beyond src/ root allowed."
+            exit 1
+          fi

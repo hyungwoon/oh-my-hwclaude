@@ -10,9 +10,10 @@
 
 import * as fs from 'node:fs'
 import type { PreToolUseInput, HookResponse } from './types.js'
+import { logMistake } from './mistake-logger.js'
 
 export function handlePreToolUse(input: PreToolUseInput): HookResponse | null {
-  const { tool_name, tool_input } = input
+  const { tool_name, tool_input, session_id } = input
 
   // 1. Edit guard — suggest hashline_edit over built-in Edit
   if (tool_name === 'Edit') {
@@ -21,12 +22,12 @@ export function handlePreToolUse(input: PreToolUseInput): HookResponse | null {
 
   // 2. Write guard — block Write on existing files
   if (tool_name === 'Write') {
-    return writeGuard(tool_input)
+    return writeGuard(tool_input, session_id)
   }
 
   // 3. Non-interactive env — block interactive commands in Bash
   if (tool_name === 'Bash') {
-    return nonInteractiveGuard(tool_input)
+    return nonInteractiveGuard(tool_input, session_id)
   }
 
   return null
@@ -76,7 +77,7 @@ const INTERACTIVE_GIT_PATTERNS = [
   /git\s+rebase\s+--interactive/,
 ]
 
-function nonInteractiveGuard(input: Record<string, unknown>): HookResponse | null {
+function nonInteractiveGuard(input: Record<string, unknown>, sessionId?: string): HookResponse | null {
   const command = (input.command as string || '').trim()
   if (!command) return null
 
@@ -89,6 +90,12 @@ function nonInteractiveGuard(input: Record<string, unknown>): HookResponse | nul
       return null
     }
     const reason = `[oh-my-hwclaude] Interactive command blocked: "${firstWord}" requires terminal interaction. Use non-interactive alternatives instead.`
+    logMistake({
+      ts: new Date().toISOString(),
+      category: 'interactive-block',
+      detail: command.slice(0, 200),
+      session_id: sessionId,
+    })
     return {
       decision: 'block',
       reason,
@@ -103,6 +110,12 @@ function nonInteractiveGuard(input: Record<string, unknown>): HookResponse | nul
   for (const pattern of INTERACTIVE_GIT_PATTERNS) {
     if (pattern.test(command)) {
       const reason = '[oh-my-hwclaude] Interactive git command blocked. Use non-interactive alternatives (e.g., git add specific files instead of -p).'
+      logMistake({
+        ts: new Date().toISOString(),
+        category: 'interactive-block',
+        detail: command.slice(0, 200),
+        session_id: sessionId,
+      })
       return {
         decision: 'block',
         reason,
@@ -117,7 +130,7 @@ function nonInteractiveGuard(input: Record<string, unknown>): HookResponse | nul
   return null
 }
 
-function writeGuard(input: Record<string, unknown>): HookResponse | null {
+function writeGuard(input: Record<string, unknown>, sessionId?: string): HookResponse | null {
   const filePath = input.file_path as string
   if (!filePath) return null
 
@@ -128,6 +141,13 @@ function writeGuard(input: Record<string, unknown>): HookResponse | null {
     const reason =
       '[oh-my-hwclaude] File already exists. Use hashline_read + hashline_edit ' +
       'to modify existing files instead of Write (which overwrites the entire file).'
+    logMistake({
+      ts: new Date().toISOString(),
+      category: 'write-guard',
+      detail: `Write attempted on existing file: ${filePath}`,
+      file: filePath,
+      session_id: sessionId,
+    })
     return {
       decision: 'block',
       reason,

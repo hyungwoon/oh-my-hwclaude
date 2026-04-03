@@ -12,8 +12,12 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/server.js",
-    "test": "vitest",
-    "lint": "tsc --noEmit"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "check:slop": "bash scripts/check-ai-slop.sh $(find src -name '*.ts' -not -name '*.test.ts')",
+    "check": "npm run lint && npm run test && npm run check:slop",
+    "prepare": "cp git-hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",

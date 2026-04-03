@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# OpenClaw-inspired pre-commit hook
+# 원칙: 자동수정 가능한 것은 수정하고, 판단 필요한 것은 차단한다
+
+set -euo pipefail
+
+STAGED_TS=$(git diff --cached --name-only --diff-filter=ACM -- '*.ts' '*.tsx' 2>/dev/null || true)
+
+# --- Phase 1: 차단 (판단 필요) ---
+
+# 1. TypeScript 타입 체크
+echo "[pre-commit] tsc --noEmit"
+npx tsc --noEmit
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Type errors found. Fix before committing."
+  exit 1
+fi
+
+# 2. AI slop 탐지
+if [ -n "$STAGED_TS" ]; then
+  echo "[pre-commit] AI slop check"
+  bash scripts/check-ai-slop.sh $STAGED_TS
+fi
+
+# 3. 테스트
+echo "[pre-commit] vitest run"
+npx vitest run --reporter=dot 2>&1
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Tests failed. Fix before committing."
+  exit 1
+fi
+
+echo "[pre-commit] All checks passed."

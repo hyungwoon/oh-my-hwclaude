@@ -9,6 +9,7 @@
 
 import type { PostToolUseInput, HookResponse } from './types.js'
 import { markVerified } from './stop-state.js'
+import { logMistake } from './mistake-logger.js'
 
 export function handlePostToolUse(input: PostToolUseInput): HookResponse | null {
   const { session_id, tool_name, tool_input, tool_output } = input
@@ -18,17 +19,40 @@ export function handlePostToolUse(input: PostToolUseInput): HookResponse | null 
 
   // 1. Edit error recovery
   if (isEditTool(tool_name) && isEditError(tool_output)) {
+    logMistake({
+      ts: new Date().toISOString(),
+      category: 'edit-error',
+      detail: tool_output.slice(0, 200),
+      file: (tool_input.file_path as string) || undefined,
+      session_id,
+    })
     return editErrorRecovery(tool_output)
   }
 
   // 2. JSON error recovery
   if (isJsonError(tool_output)) {
+    logMistake({
+      ts: new Date().toISOString(),
+      category: 'json-error',
+      detail: tool_output.slice(0, 200),
+      session_id,
+    })
     return jsonErrorRecovery()
   }
 
   // 3. Comment checker — detect AI placeholder comments after successful edits
   if (isEditTool(tool_name) && !isEditError(tool_output)) {
-    return commentChecker(tool_input, tool_output)
+    const result = commentChecker(tool_input, tool_output)
+    if (result) {
+      logMistake({
+        ts: new Date().toISOString(),
+        category: 'ai-slop',
+        detail: result.reason?.slice(0, 200) || 'AI placeholder detected',
+        file: (tool_input.file_path as string) || undefined,
+        session_id,
+      })
+    }
+    return result
   }
 
   return null
