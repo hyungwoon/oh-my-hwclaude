@@ -151,50 +151,15 @@ console.log('  ✓ Stop hook: completion check');
 console.log('  ✓ Permissions: hashline tools auto-approved');
 "
 
-# 7. Install oh-my-claudecode (multi-agent orchestration)
-OMC_INSTALLED=false
-if grep -q "oh-my-claudecode" "$SETTINGS_FILE" 2>/dev/null; then
-  echo ""
-  echo "🔌 oh-my-claudecode already installed. Skipping."
-  OMC_INSTALLED=true
-else
-  echo ""
-  echo "🔌 Installing oh-my-claudecode (multi-agent orchestration)..."
-  echo "   https://github.com/Yeachan-Heo/oh-my-claudecode"
-  if npm i -g oh-my-claude-sisyphus@latest 2>/dev/null; then
-    OMC_INSTALLED=true
-    echo "  ✓ oh-my-claudecode installed via npm"
-  else
-    echo "  ⚠️  npm global install failed. Trying with sudo..."
-    if sudo npm i -g oh-my-claude-sisyphus@latest 2>/dev/null; then
-      OMC_INSTALLED=true
-      echo "  ✓ oh-my-claudecode installed via npm (sudo)"
-    else
-      echo "  ✗ oh-my-claudecode auto-install failed."
-      echo "    Install manually: npm i -g oh-my-claude-sisyphus@latest"
-      echo "    Or in Claude Code: /plugin marketplace add https://github.com/Yeachan-Heo/oh-my-claudecode"
-    fi
-  fi
-fi
-
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  ✅ Installation complete!"
 echo ""
 echo "  MCP Server: oh-my-hwclaude"
-echo "  Rules: ~/.claude/rules/hwclaude-* (11 files)"
+echo "  Rules: ~/.claude/rules/hwclaude-* (4 files)"
 echo "  Commands: ~/.claude/commands/hwclaude-* (3 files)"
 echo "  Agents: ~/.claude/agents/hwclaude-* (6 files)"
 echo "  Hooks: PreToolUse + PostToolUse + Stop"
-echo ""
-if [ "$OMC_INSTALLED" = true ]; then
-  echo "  oh-my-claudecode: installed"
-  echo ""
-  echo "  After restarting Claude Code, run:"
-  echo "    /omc-setup"
-else
-  echo "  oh-my-claudecode: not installed (manual setup needed)"
-fi
 echo ""
 echo "  Restart Claude Code to activate."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

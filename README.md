@@ -1,17 +1,12 @@
 # oh-my-hwclaude
 
 > Claude Code를 더 똑똑하게 만들어주는 하네스 플러그인
->
-> [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) 자동 설치 포함
 
 Claude Code 쓰다 보면 답답할 때 있죠.
 공백 하나 틀려서 Edit 실패하고, 같은 파일 또 읽고, 승인 버튼 반복해서 누르고...
 
 **oh-my-hwclaude**는 이런 문제를 해결합니다.
 설치 한 번이면 모든 프로젝트에서 바로 적용됩니다.
-
-설치 시 [oh-my-claudecode(OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode)도 함께 설치됩니다.
-hwclaude가 **편집 정확도와 자율 실행**을, OMC가 **멀티에이전트 오케스트레이션**을 담당합니다.
 
 ---
 
@@ -98,12 +93,6 @@ Claude가 알아서 클론하고, 빌드하고, 설정까지 해줍니다.
 
 **Claude Code를 재시작**하면 바로 활성화됩니다.
 
-oh-my-claudecode(OMC)가 함께 설치된 경우, 재시작 후 아래 명령으로 OMC 초기 설정을 완료하세요:
-
-```
-/omc-setup
-```
-
 > Node.js 20 이상이 필요합니다.
 
 ### 제거하고 싶으면
@@ -133,14 +122,10 @@ oh-my-hwclaude 제거해줘
 | **PreToolUse 훅** | Edit/Write 사용 시 "hashline 써봐" 안내 |
 | **PostToolUse 훅** | 편집 실패 시 자동 복구 가이드 주입 |
 | **Stop 훅** | 작업 끝내기 전 "검증했어?" 리마인더 |
-| **규칙 파일** | `~/.claude/rules/hwclaude-*.md` 11개 |
-| **커맨드** | `~/.claude/commands/hwclaude-*.md` 3개 (github-triage, work-with-pr, remove-deadcode) |
-| **에이전트** | `~/.claude/agents/hwclaude-*.md` 6개 |
+| **규칙 파일** | `~/.claude/rules/hwclaude-*.md` 3개 (사용법, 자율 실행, 품질 게이트) |
 | **퍼미션** | hashline 도구 3개 자동 승인 |
-| **oh-my-claudecode** | 미설치 시 `npm i -g oh-my-claude-sisyphus@latest`로 자동 설치 |
 
 기존에 쓰던 MCP 서버, 훅, 규칙과 충돌하지 않습니다.
-oh-my-claudecode와도 충돌 없이 함께 동작합니다 — hwclaude는 편집 레이어, OMC는 오케스트레이션 레이어입니다.
 uninstall.sh로 제거하면 추가된 것만 깔끔하게 삭제돼요.
 
 ---
@@ -215,38 +200,18 @@ oh-my-hwclaude/
 │   │   │   ├── canonicalization.ts  # BOM/CRLF 처리
 │   │   │   ├── diff-utils.ts        # unified diff 생성
 │   │   │   ├── constants.ts         # 해시 딕셔너리
-│   │   │   ├── types.ts             # 타입 정의
-│   │   │   └── index.ts             # 진입점
+│   │   │   └── types.ts             # 타입 정의
 │   │   └── hashline-read/           # 해시 태그 파일 읽기
 │   ├── hooks/                       # Claude Code 훅
-│   │   ├── index.ts                 # 훅 진입점
-│   │   ├── types.ts                 # 훅 타입 정의
 │   │   ├── pre-tool-use.ts          # Edit/Write 가드
 │   │   ├── post-tool-use.ts         # 에러 자동 복구
-│   │   ├── post-tool-use-failure.ts # 실패 후처리
-│   │   ├── stop.ts                  # 완료 검증
-│   │   ├── session-start.ts         # 세션 시작 초기화
-│   │   ├── subagent-start.ts        # 서브에이전트 시작
-│   │   └── comment-checker.ts       # 코멘트 검사
+│   │   └── stop.ts                  # 완료 검증
 │   └── __tests__/                   # 테스트 (14개 전부 통과)
-├── rules/                           # Claude Code 규칙 파일 (11개)
+├── rules/                           # Claude Code 규칙 파일
 │   ├── hashline-system.md           # hashline 사용법
 │   ├── autonomous-execution.md      # 자율 실행 패턴
-│   ├── quality-gates.md             # 코드 품질 게이트
-│   ├── modular-code-enforcement.md  # 모듈러 코드 아키텍처
-│   ├── complexity-decomposer.md     # 복잡도 분해
-│   ├── context-compaction.md        # 컨텍스트 압축
-│   ├── contract-enforcement.md      # 계약 강제
-│   ├── entropy-cleanup.md           # 엔트로피 정리
-│   ├── fresh-context-verification.md # 신선 컨텍스트 검증
-│   ├── plan-compete.md              # 계획 경쟁
-│   └── telemetry-rubrics.md         # 텔레메트리 루브릭
-├── agents/                          # 커스텀 에이전트 (6개)
-├── commands/                        # 슬래시 커맨드 (3개)
-│   ├── github-triage.md             # GitHub 이슈/PR 트리아지
-│   ├── work-with-pr.md              # PR 라이프사이클
-│   └── remove-deadcode.md           # 데드코드 제거
-├── install.sh                       # 글로벌 설치 (OMC 자동 포함)
+│   └── quality-gates.md             # 코드 품질 게이트
+├── install.sh                       # 글로벌 설치 (원클릭)
 └── uninstall.sh                     # 깔끔한 제거
 ```
 
@@ -282,7 +247,6 @@ oh-my-hwclaude/
 
 ## 크레딧
 
-- [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) by Yeachan Heo — 멀티에이전트 오케스트레이션
 - [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) by YeonGyu Kim — 원본 하네스 시스템
 - [The Harness Problem](https://blog.can.ac/2026/02/12/the-harness-problem/) by Can Boluk — hashline edit 개념
 

@@ -2,10 +2,21 @@
 
 ## 편집 품질
 
-### 금지 패턴
-- AI 생성 주석 슬롭: "// TODO: implement", "// Add your code here" 등
-- 플레이스홀더 코드: `throw new Error('Not implemented')`
-- 불필요한 console.log
+### 금지 패턴 (모든 형태 열거)
+- AI 생성 주석 슬롭:
+  - `// TODO: implement`, `// TODO: add logic here`, `// TODO: complete`
+  - `// Add your code here`, `// Your implementation`, `// Implementation needed`
+  - `// ... rest of the code`, `// ... (생략)`, `// ... similar to above`
+  - `// Similar to above`, `// Same pattern as X`, `// Repeat for other cases`
+  - `/* Placeholder */`, `// FIXME`, `// HACK`
+- 플레이스홀더 코드 (모든 형태):
+  - `throw new Error('Not implemented')`
+  - `throw new Error('TODO')`
+  - `return null // temporary`
+  - `return undefined // placeholder`
+  - `pass  # TODO`
+  - 빈 함수 본문 (인터페이스/타입 정의 제외)
+- 불필요한 console.log (디버깅 잔재)
 - 하드코딩된 시크릿/토큰
 
 ### 필수 패턴
