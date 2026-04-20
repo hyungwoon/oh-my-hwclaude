@@ -1,0 +1,46 @@
+# example — 스킬 문서 템플릿 예시
+
+> 이 파일은 `.tmpl → gen-skill-docs → .md` 파이프라인의 사용법 시연용 예시입니다.
+> 실제 스킬 문서를 만들 때 이 파일을 복사해서 시작하세요.
+
+{{PREAMBLE}}
+
+---
+
+## 이 스킬이 하는 일
+
+여기에 스킬의 구체적인 목적과 동작을 서술합니다.
+
+---
+
+{{ASKUSER_FORMAT}}
+
+---
+
+{{SEARCH_BEFORE_BUILDING}}
+
+---
+
+{{BOIL_THE_LAKE}}
+
+---
+
+{{COMPLETENESS_TABLE}}
+
+---
+
+## 커스텀 섹션
+
+`.tmpl` 파일에서 직접 작성하는 스킬별 고유 내용은 placeholder 없이 자유롭게 추가합니다.
+
+### 사용 예시
+
+```bash
+# 스킬 호출 예시
+/example
+```
+
+### 주의사항
+
+- `.md` 파일은 직접 편집하지 않는다 — `.tmpl`과 resolvers를 수정 후 regenerate
+- `bun run gen-skill-docs --file commands/example.tmpl`
