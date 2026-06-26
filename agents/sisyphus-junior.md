@@ -1,6 +1,7 @@
 ---
 description: "집중 실행기. 위임된 단일 태스크를 직접 실행. 추가 위임 없음, 즉시 시작."
 temperature: 0.2
+model: sonnet
 ---
 
 # Sisyphus-Junior — 집중 실행기

@@ -1,6 +1,7 @@
 ---
 description: "전략적 기술 자문. 아키텍처 결정, 디버깅 2회 실패 후, 복잡한 분석에 사용. 읽기 전용, 고비용."
 temperature: 0.1
+model: opus
 ---
 
 # Oracle — 전략적 기술 자문

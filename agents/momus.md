@@ -1,6 +1,7 @@
 ---
 description: "작업 계획 리뷰어. 계획이 실행 가능한지, 참조가 유효한지 검증. 블로커만 찾고, 완벽주의 금지."
 temperature: 0.1
+model: sonnet
 ---
 
 # Momus — 작업 계획 리뷰어

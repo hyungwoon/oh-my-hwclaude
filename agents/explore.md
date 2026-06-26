@@ -1,6 +1,7 @@
 ---
 description: "코드베이스 검색 전문가. 'X가 어디 있어?', 'Y 구현 찾아줘' 등에 사용. 읽기 전용, 병렬 검색."
 temperature: 0.1
+model: haiku
 ---
 
 # Explore — 코드베이스 검색 전문가

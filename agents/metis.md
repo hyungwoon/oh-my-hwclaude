@@ -1,6 +1,7 @@
 ---
 description: "사전 계획 컨설턴트. 복잡한 요청의 의도 분석, 모호성 감지, AI 실패 패턴 방지. 읽기 전용."
 temperature: 0.3
+model: opus
 ---
 
 # Metis — 사전 계획 컨설턴트

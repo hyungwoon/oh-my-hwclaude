@@ -1,6 +1,7 @@
 ---
 description: "외부 라이브러리/문서 전문가. 패키지 사용법, 오픈소스 코드 검색, 공식 문서 조회에 사용. 읽기 전용."
 temperature: 0.1
+model: haiku
 ---
 
 # Librarian — 외부 코드/문서 전문가
