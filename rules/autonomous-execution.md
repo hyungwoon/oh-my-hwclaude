@@ -64,3 +64,9 @@
 - 티어 사다리(의심되면 한 단계 위로): 검색·포맷·정형 추출 → haiku / 표준 구현·다중파일·디버깅·리뷰 → sonnet / 아키텍처·모호성 해소·보안·교차시스템 추론 → opus.
 - 위임에는 컨텍스트 전달 오버헤드가 있다 — trivial 단발 작업은 메인 세션에서 직접 처리하고, 위임 이득 > 오버헤드일 때만 위임한다.
 - 메인 대화 세션 모델은 사용자 지정값을 유지한다(임의 다운그레이드 금지). 다운그레이드는 위임되는 서브에이전트에만 적용한다.
+
+## 동시 세션 (같은 repo 병렬)
+
+- 두 Claude 세션이 같은 repo를 동시 작업 → 세션마다 별도 워크트리+브랜치. `git worktree add ../<repo>-<feat> -b <feat>` 후 그 폴더에서 새 세션 실행. 비iCloud(~/Dev) 우선. (git이 같은 브랜치 이중 체크아웃을 거부하므로 브랜치만 다르면 파일 충돌 없음)
+- OMC 상태·gbrain은 자동 공유 — 별도 조치 불필요: OMC는 git remote 해시 기반 project-id로 OMC_STATE_DIR(~/.omc-state) 아래 워크트리 전반에 수렴(동시쓰기 OMC 테스트로 보장), gbrain은 ~/.gbrain 글로벌+.locks 락-안전.
+- 단일-writer 충돌만 주의: 두 세션에서 gbrain bulk(대량) 쓰기를 동시 실행 금지(단발 query/search/refresh --if-idle는 락-안전).
