@@ -67,6 +67,6 @@
 
 ## 동시 세션 (같은 repo 병렬)
 
-- 두 Claude 세션이 같은 repo를 동시 작업 → 세션마다 별도 워크트리+브랜치. `git worktree add ../<repo>-<feat> -b <feat>` 후 그 폴더에서 새 세션 실행. 비iCloud(~/Dev) 우선. (git이 같은 브랜치 이중 체크아웃을 거부하므로 브랜치만 다르면 파일 충돌 없음)
-- OMC 상태·gbrain은 자동 공유 — 별도 조치 불필요: OMC는 git remote 해시 기반 project-id로 OMC_STATE_DIR(~/.omc-state) 아래 워크트리 전반에 수렴(동시쓰기 OMC 테스트로 보장), gbrain은 ~/.gbrain 글로벌+.locks 락-안전.
-- 단일-writer 충돌만 주의: 두 세션에서 gbrain bulk(대량) 쓰기를 동시 실행 금지(단발 query/search/refresh --if-idle는 락-안전).
+- 두 Claude 세션이 같은 repo 동시 작업 → 세션마다 별도 워크트리+브랜치(`git worktree add ../<repo>-<feat> -b <feat>`), repo 루트에서 새 세션 실행. 비iCloud(~/Dev) 우선. (git이 같은 브랜치 이중 체크아웃 거부 → 브랜치만 다르면 파일 충돌 없음)
+- OMC 상태는 **세션별 격리가 기본**(업계 표준·안전): `OMC_STATE_DIR`로 강제 공유하지 말 것 — 싱글톤 파일(project-memory.json 등)의 MCP 쓰기 경로는 락이 없어 동시쓰기 시 조용히 유실됨. 각 워크트리가 자기 .omc/를 가짐.
+- gbrain은 ~/.gbrain 머신 글로벌이라 worklog/지식은 자연히 공유됨. 단 PGLite 단일-writer → 두 세션에서 수동 bulk 쓰기 동시 실행 금지(단발 query/search·launchd refresh --if-idle는 안전). serve 상주 금지(메모리 결정 유지).
